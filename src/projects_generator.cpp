@@ -9,34 +9,36 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <inja/inja.hpp>
+#include <utils.hpp>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_stdlib.h"
 
-
-#include <inja/inja.hpp>
-#include <spdlog/spdlog.h>
-#include <utils.hpp>
-
 ProjectsGenerator::ProjectsGenerator() : template_variables_value(template_variables.size()) {
-  for (std::size_t i = 0; i < template_variables.size(); ++i)
+  for (std::size_t i = 0; i < template_variables.size(); ++i) {
     template_variables_value[i].resize(template_variables[i].size());
+  }
   spdlog::cfg::load_env_levels();
   // Setup window
   glfwSetErrorCallback(
       [](int error, const char *description) { spdlog::error("Glfw error {}: {}\n", error, description); });
-  if (!glfwInit()) exit(EXIT_FAILURE);
+  if (glfwInit() == 0) {
+    exit(EXIT_FAILURE);
+  }
 
   // Decide GL+GLSL versions
   const char *glsl_version = "#version 130";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   // Create window with graphics context
-  window_ = glfwCreateWindow(1280, 720, "ImGui Demo", NULL, NULL);
+  window_ = glfwCreateWindow(1280, 720, "ImGui Demo", nullptr, nullptr);
 
-  if (window_ == NULL) exit(EXIT_FAILURE);
+  if (window_ == nullptr) {
+    exit(EXIT_FAILURE);
+  }
   glfwMakeContextCurrent(window_);
   glfwSwapInterval(1);  // Enable vsync
 
@@ -70,7 +72,7 @@ ProjectsGenerator::~ProjectsGenerator() {
 }
 
 void ProjectsGenerator::run() {  // Main loop
-  while (!glfwWindowShouldClose(window_)) {
+  while (glfwWindowShouldClose(window_) == 0) {
     // Poll and handle events (inputs, window resize, etc.)
     // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to
     // tell if dear imgui wants to use your inputs.
@@ -91,8 +93,12 @@ void ProjectsGenerator::run() {  // Main loop
     if (ImGui::BeginCombo("Templates", templates_names[current_template].data())) {
       for (std::size_t i = 0; i < templates_names.size(); ++i) {
         const bool is_selected = (current_template == i);
-        if (ImGui::Selectable(templates_names[i].data(), is_selected)) current_template = i;
-        if (is_selected) ImGui::SetItemDefaultFocus();
+        if (ImGui::Selectable(templates_names[i].data(), is_selected)) {
+          current_template = i;
+        }
+        if (is_selected) {
+          ImGui::SetItemDefaultFocus();
+        }
       }
       ImGui::EndChild();
     }
@@ -122,8 +128,9 @@ void ProjectsGenerator::run() {  // Main loop
         env.add_callback("underscoreToDash",
                          [](inja::Arguments args) { return underscoreToDash(args[0]->get<std::string>()); });
         nlohmann::json data;
-        for(std::size_t i = 0;i < template_variables[current_template].size();++i)
+        for (std::size_t i = 0; i < template_variables[current_template].size(); ++i) {
           data[template_variables[current_template][i].data()] = template_variables_value[current_template][i];
+        }
         std::filesystem::create_directory("/tmp/pkg");
         std::filesystem::create_directory("/tmp/pkg/src");
         std::filesystem::create_directory("/tmp/pkg/include");
@@ -147,10 +154,11 @@ void ProjectsGenerator::run() {  // Main loop
     }
     // Rendering
     ImGui::Render();
-    int display_w, display_h;
+    int display_w = 0;
+    int display_h = 0;
     glfwGetFramebufferSize(window_, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+    glClearColor(0.45F, 0.55F, 0.60F, 1.00F);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window_);
