@@ -1,0 +1,21 @@
+{
+  "name": "projects-generator",
+  "version-string": "0.0.1",
+  "dependencies": [
+    "spdlog",
+    "glfw3",
+    "glew",
+    "nlohmann-json",
+    "inja",
+    "fmt",
+    {
+      "name": "imgui",
+      "default-features": false,
+      "features": [
+        "docking-experimental",
+        "glfw-binding",
+        "opengl3-glew-binding"
+      ]
+    }
+  ]
+}

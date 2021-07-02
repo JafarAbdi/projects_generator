@@ -1,0 +1,18 @@
+{
+  "name": "{{underscoreToDash(PROJECT_NAME)}}",
+  "version-string": "0.0.1",
+  "dependencies": [
+    "spdlog",
+    "glfw3",
+    "glew",
+    {
+      "name": "imgui",
+      "default-features": false,
+      "features": [
+        "docking-experimental",
+        "glfw-binding",
+        "opengl3-glew-binding"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+#include "{{camelCaseToSnakeCase(CLASS_NAME)}}.hpp"
+
+int main() {
+  {{CLASS_NAME}} {{camelCaseToSnakeCase(CLASS_NAME)}};
+  {{camelCaseToSnakeCase(CLASS_NAME)}}.run();
+  return 0;
+}
