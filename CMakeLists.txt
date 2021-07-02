@@ -3,7 +3,14 @@ project(projects_generator)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_compile_options(-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual)
+add_compile_options(
+  -Wall
+  -Wextra
+  -Wwrite-strings
+  -Wunreachable-code
+  -Wpointer-arith
+  -Wredundant-decls
+  -Wcast-qual)
 
 find_package(imgui REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -12,38 +19,30 @@ find_package(spdlog REQUIRED)
 find_package(inja REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
-add_library(projects_generator_lib SHARED
-  src/projects_generator.cpp
-    src/utils.cpp include/utils.hpp)
-target_include_directories(projects_generator_lib
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries(projects_generator_lib PUBLIC
-    imgui::imgui
-    glfw
-    GLEW::GLEW
-    spdlog::spdlog
-    spdlog::spdlog_header_only
-    pantor::inja
-    nlohmann_json
-    nlohmann_json::nlohmann_json
-    stdc++fs
-    fmt::fmt
-)
-set_target_properties(projects_generator_lib PROPERTIES
-    SOVERSION 0
-    VERSION 0.0.1
-)
+add_library(projects_generator_lib SHARED src/projects_generator.cpp src/utils.cpp include/utils.hpp)
+target_include_directories(projects_generator_lib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                                                         $<INSTALL_INTERFACE:include>)
+target_link_libraries(
+  projects_generator_lib
+  PUBLIC imgui::imgui
+         glfw
+         GLEW::GLEW
+         spdlog::spdlog
+         spdlog::spdlog_header_only
+         pantor::inja
+         nlohmann_json
+         nlohmann_json::nlohmann_json
+         stdc++fs
+         fmt::fmt)
+set_target_properties(projects_generator_lib PROPERTIES SOVERSION 0 VERSION 0.0.1)
 
 add_executable(projects_generator_exec src/main.cpp)
-target_link_libraries(projects_generator_exec PRIVATE
-    projects_generator_lib
-)
+target_link_libraries(projects_generator_exec PRIVATE projects_generator_lib)
 target_include_directories(projects_generator_exec PRIVATE include)
 
 include(GNUInstallDirs)
-install(TARGETS projects_generator_exec projects_generator_lib
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
+install(
+  TARGETS projects_generator_exec projects_generator_lib
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
