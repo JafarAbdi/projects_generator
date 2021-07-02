@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.3.4
       - name: Install OpenGL
-        run: sudo apt-get install libgl1-mesa-dev
+        run: sudo apt-get install xorg-dev libgl1-mesa-dev
       # Install latest CMake.
       - uses: lukka/get-cmake@latest
       # Restore from cache the previously built ports. If a "cache miss" occurs, then vcpkg is bootstrapped. Since a the vcpkg.json is being used later on to install the packages when run-cmake runs, no packages are installed at this time and the input 'setupOnly:true' is mandatory.
