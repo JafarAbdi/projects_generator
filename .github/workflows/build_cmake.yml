@@ -13,6 +13,7 @@ env:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
     env:
       buildDir: '${{ github.workspace }}/build/'
     steps:
