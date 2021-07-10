@@ -12,12 +12,13 @@
 #include <inja/inja.hpp>
 #include <utils.hpp>
 
-#include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_stdlib.h"
 
-ProjectsGenerator::ProjectsGenerator() : template_variables_value(template_variables.size()) {
+ProjectsGenerator::ProjectsGenerator()
+    : template_variables_value(template_variables.size()),
+      file_browser(ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir) {
   for (std::size_t i = 0; i < template_variables.size(); ++i) {
     template_variables_value[i].resize(template_variables[i].size());
   }
@@ -102,7 +103,7 @@ void ProjectsGenerator::run() {  // Main loop
       }
       ImGui::EndChild();
     }
-    // 2: name & value
+    // 2 columns: name & value
     if (ImGui::BeginTable("Variables", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable)) {
       for (std::size_t i = 0; i < template_variables[current_template].size(); ++i) {
         ImGui::TableNextRow();
@@ -114,12 +115,29 @@ void ProjectsGenerator::run() {  // Main loop
         ImGui::InputText(
             variable_value.c_str(), &template_variables_value[current_template][i], ImGuiInputTextFlags_CharsNoBlank);
       }
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      if (ImGui::Button("Select path")) {
+        file_browser.Open();
+      }
+      file_browser.Display();
+      if (file_browser.HasSelected()) {
+        package_path = file_browser.GetSelected().string();
+        file_browser.ClearSelected();
+      }
+      ImGui::TableNextColumn();
+      ImGui::SetNextItemWidth(-1);
+      ImGui::InputText("package_path", &package_path, ImGuiInputTextFlags_CharsNoBlank);
       ImGui::EndTable();
     }
     if (ImGui::Button("Generate")) {
       if (std::any_of(template_variables_value[current_template].cbegin(),
                       template_variables_value[current_template].cend(),
                       [](const std::string &value) { return value.empty(); })) {
+        ImGui::OpenPopup("Missing value");
+        error_message = "Missing one of the template parameters";
+      } else if (!std::filesystem::exists(package_path)) {
+        error_message = "The path specified doesn't exists";
         ImGui::OpenPopup("Missing value");
       } else {
         inja::Environment env;
@@ -131,22 +149,23 @@ void ProjectsGenerator::run() {  // Main loop
         for (std::size_t i = 0; i < template_variables[current_template].size(); ++i) {
           data[template_variables[current_template][i].data()] = template_variables_value[current_template][i];
         }
-        std::filesystem::create_directory("/tmp/pkg");
-        std::filesystem::create_directory("/tmp/pkg/src");
-        std::filesystem::create_directory("/tmp/pkg/include");
+        std::filesystem::create_directory(package_path + "/src");
+        std::filesystem::create_directory(package_path + "/include");
         auto vcpkg_temp = env.parse_template("./imgui_templates/vcpkg.json.inja");
-        env.write(vcpkg_temp, data, "/tmp/pkg/vcpkg.json");
+        env.write(vcpkg_temp, data, package_path + "/vcpkg.json");
         auto imgui_cpp_temp = env.parse_template("./imgui_templates/imgui.cpp.inja");
-        env.write(imgui_cpp_temp, data, "/tmp/pkg/src/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".cpp");
+        env.write(imgui_cpp_temp, data, package_path + "/src/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".cpp");
         auto imgui_hpp_temp = env.parse_template("./imgui_templates/imgui.hpp.inja");
-        env.write(imgui_hpp_temp, data, "/tmp/pkg/include/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".hpp");
+        env.write(imgui_hpp_temp, data, package_path + "/include/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".hpp");
         auto main_temp = env.parse_template("./imgui_templates/main.cpp.inja");
-        env.write(main_temp, data, "/tmp/pkg/src/main.cpp");
+        env.write(main_temp, data, package_path + "/src/main.cpp");
         auto cmake_temp = env.parse_template("./imgui_templates/CMakeLists.txt.inja");
-        env.write(cmake_temp, data, "/tmp/pkg/CMakeLists.txt");
+        env.write(cmake_temp, data, package_path + "/CMakeLists.txt");
       }
     }
     if (ImGui::BeginPopupModal("Missing value", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::Text("%s", error_message.c_str());
+      ImGui::Separator();
       if (ImGui::Button("OK", ImVec2(120, 0))) {
         ImGui::CloseCurrentPopup();
       }

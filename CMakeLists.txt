@@ -19,6 +19,15 @@ find_package(spdlog REQUIRED)
 find_package(inja REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
+include(FetchContent)
+FetchContent_Declare(
+  imgui-filebrowser
+  GIT_REPOSITORY https://github.com/AirGuanZ/imgui-filebrowser.git
+  GIT_TAG master)
+FetchContent_MakeAvailable(imgui-filebrowser)
+add_library(imgui-filebrowser INTERFACE)
+target_include_directories(imgui-filebrowser INTERFACE ${imgui-filebrowser_SOURCE_DIR})
+
 add_library(projects_generator_lib SHARED src/projects_generator.cpp src/utils.cpp include/utils.hpp)
 target_include_directories(projects_generator_lib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                                                          $<INSTALL_INTERFACE:include>)
@@ -33,7 +42,8 @@ target_link_libraries(
          nlohmann_json
          nlohmann_json::nlohmann_json
          stdc++fs
-         fmt::fmt)
+         fmt::fmt
+         imgui-filebrowser)
 set_target_properties(projects_generator_lib PROPERTIES SOVERSION 0 VERSION 0.0.1)
 
 add_executable(projects_generator_exec src/main.cpp)
