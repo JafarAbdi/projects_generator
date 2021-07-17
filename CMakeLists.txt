@@ -46,13 +46,13 @@ target_link_libraries(
          imgui-filebrowser)
 set_target_properties(projects_generator_lib PROPERTIES SOVERSION 0 VERSION 0.0.1)
 
-add_executable(projects_generator_exec src/main.cpp)
-target_link_libraries(projects_generator_exec PRIVATE projects_generator_lib)
-target_include_directories(projects_generator_exec PRIVATE include)
+add_executable(projects_generator src/main.cpp)
+target_link_libraries(projects_generator PRIVATE projects_generator_lib)
+target_include_directories(projects_generator PRIVATE include)
 
 include(GNUInstallDirs)
 install(
-  TARGETS projects_generator_exec projects_generator_lib
+  TARGETS projects_generator projects_generator_lib
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
