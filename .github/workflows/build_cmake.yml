@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       buildDir: '${{ github.workspace }}/build/'
+      VCPKG_DIR: '${{ github.workspace }}/vcpkg'
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -31,7 +32,7 @@ jobs:
           # Just install vcpkg for now, do not install any ports in this step yet.
           setupOnly: true
           # Location of the vcpkg submodule in the Git repository.
-          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+          vcpkgDirectory: ${{ env.VCPKG_DIR }}
           # Since the cache must be invalidated when content of the vcpkg.json file changes, let's
           # compute its hash and append this to the computed cache's key.
           appendedCacheKey: ${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
