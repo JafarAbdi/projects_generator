@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       buildDir: '${{ github.workspace }}/build/'
+      VCPKG_DIR: '${{ github.workspace }}/vcpkg'
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
@@ -31,7 +32,7 @@ jobs:
           # Just install vcpkg for now, do not install any ports in this step yet.
           setupOnly: true
           # Location of the vcpkg submodule in the Git repository.
-          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+          vcpkgDirectory: ${{ env.VCPKG_DIR }}
           # Since the cache must be invalidated when content of the vcpkg.json file changes, let's
           # compute its hash and append this to the computed cache's key.
           appendedCacheKey: ${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
@@ -48,3 +49,28 @@ jobs:
           # This input tells run-cmake to consume the vcpkg.cmake toolchain file set by run-vcpkg.
           useVcpkgToolchainFile: true
           buildWithCMake: true
+      - name: Build AppImage
+        run: bash -ex ${{ github.workspace }}/scripts/build_appimage.sh
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: AppImage
+          path: projects_generator*.AppImage*
+
+  upload:
+    name: Create release and upload artifacts
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+      - name: Inspect directory after downloading artifacts
+        run: ls -alFR
+      - name: Create release and upload artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          wget -q https://github.com/TheAssassin/pyuploadtool/releases/download/continuous/pyuploadtool-x86_64.AppImage
+          chmod +x pyuploadtool-x86_64.AppImage
+          ./pyuploadtool-x86_64.AppImage **/projects_generator*.AppImage*
