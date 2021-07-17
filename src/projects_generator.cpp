@@ -92,86 +92,97 @@ void ProjectsGenerator::run() {  // Main loop
     ImGui::NewFrame();
 
     // Main application
-    if (ImGui::BeginCombo("Templates", templates_names[current_template].data())) {
-      for (std::size_t i = 0; i < templates_names.size(); ++i) {
-        const bool is_selected = (current_template == i);
-        if (ImGui::Selectable(templates_names[i].data(), is_selected)) {
-          current_template = i;
+    const ImGuiViewport *viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    if (ImGui::Begin("Example: Fullscreen window",
+                     nullptr,
+                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration |
+                         ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
+      if (ImGui::BeginCombo("Templates", templates_names[current_template].data())) {
+        for (std::size_t i = 0; i < templates_names.size(); ++i) {
+          const bool is_selected = (current_template == i);
+          if (ImGui::Selectable(templates_names[i].data(), is_selected)) {
+            current_template = i;
+          }
+          if (is_selected) {
+            ImGui::SetItemDefaultFocus();
+          }
         }
-        if (is_selected) {
-          ImGui::SetItemDefaultFocus();
-        }
+        ImGui::EndChild();
       }
-      ImGui::EndChild();
-    }
-    // 2 columns: name & value
-    if (ImGui::BeginTable("Variables", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable)) {
-      for (std::size_t i = 0; i < template_variables[current_template].size(); ++i) {
+      // 2 columns: name & value
+      if (ImGui::BeginTable("Variables", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable)) {
+        for (std::size_t i = 0; i < template_variables[current_template].size(); ++i) {
+          ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", template_variables[current_template][i].data());
+          ImGui::TableNextColumn();
+          ImGui::SetNextItemWidth(-1);
+          const auto variable_value = fmt::format("##{}_value", template_variables[current_template][i].data());
+          ImGui::InputText(
+              variable_value.c_str(), &template_variables_value[current_template][i], ImGuiInputTextFlags_CharsNoBlank);
+        }
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        ImGui::Text("%s", template_variables[current_template][i].data());
+        if (ImGui::Button("Select path")) {
+          file_browser.Open();
+        }
+        file_browser.Display();
+        if (file_browser.HasSelected()) {
+          package_path = file_browser.GetSelected().string();
+          file_browser.ClearSelected();
+        }
         ImGui::TableNextColumn();
         ImGui::SetNextItemWidth(-1);
-        const auto variable_value = fmt::format("##{}_value", template_variables[current_template][i].data());
-        ImGui::InputText(
-            variable_value.c_str(), &template_variables_value[current_template][i], ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::InputText("package_path", &package_path, ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::EndTable();
       }
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      if (ImGui::Button("Select path")) {
-        file_browser.Open();
-      }
-      file_browser.Display();
-      if (file_browser.HasSelected()) {
-        package_path = file_browser.GetSelected().string();
-        file_browser.ClearSelected();
-      }
-      ImGui::TableNextColumn();
-      ImGui::SetNextItemWidth(-1);
-      ImGui::InputText("package_path", &package_path, ImGuiInputTextFlags_CharsNoBlank);
-      ImGui::EndTable();
-    }
-    if (ImGui::Button("Generate")) {
-      if (std::any_of(template_variables_value[current_template].cbegin(),
-                      template_variables_value[current_template].cend(),
-                      [](const std::string &value) { return value.empty(); })) {
-        ImGui::OpenPopup("Missing value");
-        error_message = "Missing one of the template parameters";
-      } else if (!std::filesystem::exists(package_path)) {
-        error_message = "The path specified doesn't exists";
-        ImGui::OpenPopup("Missing value");
-      } else {
-        inja::Environment env;
-        env.add_callback("camelCaseToSnakeCase",
-                         [](inja::Arguments args) { return camelCaseToSnakeCase(args[0]->get<std::string>()); });
-        env.add_callback("underscoreToDash",
-                         [](inja::Arguments args) { return underscoreToDash(args[0]->get<std::string>()); });
-        nlohmann::json data;
-        for (std::size_t i = 0; i < template_variables[current_template].size(); ++i) {
-          data[template_variables[current_template][i].data()] = template_variables_value[current_template][i];
+      if (ImGui::Button("Generate")) {
+        if (std::any_of(template_variables_value[current_template].cbegin(),
+                        template_variables_value[current_template].cend(),
+                        [](const std::string &value) { return value.empty(); })) {
+          ImGui::OpenPopup("Missing value");
+          error_message = "Missing one of the template parameters";
+        } else if (!std::filesystem::exists(package_path)) {
+          error_message = "The path specified doesn't exists";
+          ImGui::OpenPopup("Missing value");
+        } else {
+          inja::Environment env;
+          env.add_callback("camelCaseToSnakeCase",
+                           [](inja::Arguments args) { return camelCaseToSnakeCase(args[0]->get<std::string>()); });
+          env.add_callback("underscoreToDash",
+                           [](inja::Arguments args) { return underscoreToDash(args[0]->get<std::string>()); });
+          nlohmann::json data;
+          for (std::size_t i = 0; i < template_variables[current_template].size(); ++i) {
+            data[template_variables[current_template][i].data()] = template_variables_value[current_template][i];
+          }
+          std::filesystem::create_directory(package_path + "/src");
+          std::filesystem::create_directory(package_path + "/include");
+          auto vcpkg_temp = env.parse_template(templates_path_ + "/imgui_templates/vcpkg.json.inja");
+          env.write(vcpkg_temp, data, package_path + "/vcpkg.json");
+          auto imgui_cpp_temp = env.parse_template(templates_path_ + "/imgui_templates/imgui.cpp.inja");
+          env.write(imgui_cpp_temp, data, package_path + "/src/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".cpp");
+          auto imgui_hpp_temp = env.parse_template(templates_path_ + "/imgui_templates/imgui.hpp.inja");
+          env.write(
+              imgui_hpp_temp, data, package_path + "/include/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".hpp");
+          auto main_temp = env.parse_template(templates_path_ + "/imgui_templates/main.cpp.inja");
+          env.write(main_temp, data, package_path + "/src/main.cpp");
+          auto cmake_temp = env.parse_template(templates_path_ + "/imgui_templates/CMakeLists.txt.inja");
+          env.write(cmake_temp, data, package_path + "/CMakeLists.txt");
         }
-        std::filesystem::create_directory(package_path + "/src");
-        std::filesystem::create_directory(package_path + "/include");
-        auto vcpkg_temp = env.parse_template(templates_path_ + "/imgui_templates/vcpkg.json.inja");
-        env.write(vcpkg_temp, data, package_path + "/vcpkg.json");
-        auto imgui_cpp_temp = env.parse_template(templates_path_ + "/imgui_templates/imgui.cpp.inja");
-        env.write(imgui_cpp_temp, data, package_path + "/src/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".cpp");
-        auto imgui_hpp_temp = env.parse_template(templates_path_ + "/imgui_templates/imgui.hpp.inja");
-        env.write(imgui_hpp_temp, data, package_path + "/include/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".hpp");
-        auto main_temp = env.parse_template(templates_path_ + "/imgui_templates/main.cpp.inja");
-        env.write(main_temp, data, package_path + "/src/main.cpp");
-        auto cmake_temp = env.parse_template(templates_path_ + "/imgui_templates/CMakeLists.txt.inja");
-        env.write(cmake_temp, data, package_path + "/CMakeLists.txt");
+      }
+      ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+      if (ImGui::BeginPopupModal("Missing value", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("%s", error_message.c_str());
+        ImGui::Separator();
+        if (ImGui::Button("OK", ImVec2(120, 0))) {
+          ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
       }
     }
-    if (ImGui::BeginPopupModal("Missing value", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-      ImGui::Text("%s", error_message.c_str());
-      ImGui::Separator();
-      if (ImGui::Button("OK", ImVec2(120, 0))) {
-        ImGui::CloseCurrentPopup();
-      }
-      ImGui::EndPopup();
-    }
+    ImGui::End();
     // Rendering
     ImGui::Render();
     int display_w = 0;
