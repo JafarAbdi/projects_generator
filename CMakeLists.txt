@@ -48,7 +48,12 @@ target_link_libraries(
 set_target_properties(projects_generator_lib PROPERTIES SOVERSION 0 VERSION 0.0.1)
 
 add_executable(projects_generator src/main.cpp)
-target_link_libraries(projects_generator PRIVATE projects_generator_lib gflags_shared)
+target_link_libraries(projects_generator PRIVATE projects_generator_lib)
+if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
+  target_link_libraries(projects_generator PRIVATE gflags)
+else()
+  target_link_libraries(projects_generator PRIVATE gflags_shared)
+endif()
 target_include_directories(projects_generator PRIVATE include)
 
 include(GNUInstallDirs)
