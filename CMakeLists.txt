@@ -56,3 +56,5 @@ install(
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES resources/projects_generator.desktop DESTINATION share/applications/)
+install(FILES resources/projects_generator.png DESTINATION share/icons/hicolor/128x128/apps)
