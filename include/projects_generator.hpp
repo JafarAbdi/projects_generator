@@ -14,7 +14,7 @@ struct GLFWwindow;
 
 class ProjectsGenerator {
  public:
-  ProjectsGenerator();
+  ProjectsGenerator(std::string templates_path);
 
   ~ProjectsGenerator();
 
@@ -29,4 +29,5 @@ class ProjectsGenerator {
   ImGui::FileBrowser file_browser;
   std::string package_path;
   std::string error_message;
+  const std::string templates_path_;
 };

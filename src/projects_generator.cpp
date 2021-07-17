@@ -16,9 +16,10 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_stdlib.h"
 
-ProjectsGenerator::ProjectsGenerator()
+ProjectsGenerator::ProjectsGenerator(std::string templates_path)
     : template_variables_value(template_variables.size()),
-      file_browser(ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir) {
+      file_browser(ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir),
+      templates_path_(std::move(templates_path)) {
   for (std::size_t i = 0; i < template_variables.size(); ++i) {
     template_variables_value[i].resize(template_variables[i].size());
   }
@@ -151,15 +152,15 @@ void ProjectsGenerator::run() {  // Main loop
         }
         std::filesystem::create_directory(package_path + "/src");
         std::filesystem::create_directory(package_path + "/include");
-        auto vcpkg_temp = env.parse_template("./imgui_templates/vcpkg.json.inja");
+        auto vcpkg_temp = env.parse_template(templates_path_ + "/imgui_templates/vcpkg.json.inja");
         env.write(vcpkg_temp, data, package_path + "/vcpkg.json");
-        auto imgui_cpp_temp = env.parse_template("./imgui_templates/imgui.cpp.inja");
+        auto imgui_cpp_temp = env.parse_template(templates_path_ + "/imgui_templates/imgui.cpp.inja");
         env.write(imgui_cpp_temp, data, package_path + "/src/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".cpp");
-        auto imgui_hpp_temp = env.parse_template("./imgui_templates/imgui.hpp.inja");
+        auto imgui_hpp_temp = env.parse_template(templates_path_ + "/imgui_templates/imgui.hpp.inja");
         env.write(imgui_hpp_temp, data, package_path + "/include/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".hpp");
-        auto main_temp = env.parse_template("./imgui_templates/main.cpp.inja");
+        auto main_temp = env.parse_template(templates_path_ + "/imgui_templates/main.cpp.inja");
         env.write(main_temp, data, package_path + "/src/main.cpp");
-        auto cmake_temp = env.parse_template("./imgui_templates/CMakeLists.txt.inja");
+        auto cmake_temp = env.parse_template(templates_path_ + "/imgui_templates/CMakeLists.txt.inja");
         env.write(cmake_temp, data, package_path + "/CMakeLists.txt");
       }
     }

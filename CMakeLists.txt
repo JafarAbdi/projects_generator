@@ -18,6 +18,7 @@ find_package(GLEW REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(inja REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(gflags REQUIRED)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -47,7 +48,7 @@ target_link_libraries(
 set_target_properties(projects_generator_lib PROPERTIES SOVERSION 0 VERSION 0.0.1)
 
 add_executable(projects_generator src/main.cpp)
-target_link_libraries(projects_generator PRIVATE projects_generator_lib)
+target_link_libraries(projects_generator PRIVATE projects_generator_lib gflags_shared)
 target_include_directories(projects_generator PRIVATE include)
 
 include(GNUInstallDirs)
@@ -58,3 +59,4 @@ install(
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES resources/projects_generator.desktop DESTINATION share/applications/)
 install(FILES resources/projects_generator.png DESTINATION share/icons/hicolor/128x128/apps)
+install(DIRECTORY imgui_templates DESTINATION share)

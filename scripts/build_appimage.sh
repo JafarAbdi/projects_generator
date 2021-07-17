@@ -1,7 +1,6 @@
 #! /bin/bash
 
 # https://docs.appimage.org/packaging-guide/from-source/native-binaries.html#examples
-# To debug ./projects_generator-x86_64.AppImage --appimage-mount /tmp/asd
 
 set -x
 set -e
