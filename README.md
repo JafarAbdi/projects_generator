@@ -10,3 +10,13 @@ Generate packages/projects from templates
 ```
 ./scripts/build_appimage.sh
 ```
+
+### Run the program
+```
+./projects_generator-x86_64.AppImage
+```
+
+### Debug the appimage program
+```
+./projects_generator-x86_64.AppImage --appimage-mount # cd /tmp/.mount_######
+```

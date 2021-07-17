@@ -8,6 +8,7 @@
     "nlohmann-json",
     "inja",
     "fmt",
+    "gflags",
     {
       "name": "imgui",
       "default-features": false,
