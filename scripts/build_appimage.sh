@@ -52,4 +52,5 @@ chmod +x $BUILD_DIR/AppRun
 ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage --custom-apprun AppRun
 
 # move built AppImage back into original CWD
+chmod +x projects_generator*.AppImage
 mv projects_generator*.AppImage "$OLD_CWD"
