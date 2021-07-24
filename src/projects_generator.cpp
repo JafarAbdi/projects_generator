@@ -17,12 +17,9 @@
 #include "imgui_stdlib.h"
 
 ProjectsGenerator::ProjectsGenerator(std::string templates_path)
-    : template_variables_value(template_variables.size()),
-      file_browser(ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir),
+    : file_browser(ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir),
       templates_path_(std::move(templates_path)) {
-  for (std::size_t i = 0; i < template_variables.size(); ++i) {
-    template_variables_value[i].resize(template_variables[i].size());
-  }
+  templates = YAML::LoadFile(templates_path_ / "config.yaml")["templates"].as<std::vector<Template>>();
   spdlog::cfg::load_env_levels();
   // Setup window
   glfwSetErrorCallback(
@@ -99,10 +96,10 @@ void ProjectsGenerator::run() {  // Main loop
                      nullptr,
                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration |
                          ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
-      if (ImGui::BeginCombo("Templates", templates_names[current_template].data())) {
-        for (std::size_t i = 0; i < templates_names.size(); ++i) {
+      if (ImGui::BeginCombo("Templates", templates[current_template].name.c_str())) {
+        for (std::size_t i = 0; i < templates.size(); ++i) {
           const bool is_selected = (current_template == i);
-          if (ImGui::Selectable(templates_names[i].data(), is_selected)) {
+          if (ImGui::Selectable(templates[i].name.c_str(), is_selected)) {
             current_template = i;
           }
           if (is_selected) {
@@ -113,15 +110,14 @@ void ProjectsGenerator::run() {  // Main loop
       }
       // 2 columns: name & value
       if (ImGui::BeginTable("Variables", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable)) {
-        for (std::size_t i = 0; i < template_variables[current_template].size(); ++i) {
+        for (auto &variable : templates[current_template].variables) {
           ImGui::TableNextRow();
           ImGui::TableNextColumn();
-          ImGui::Text("%s", template_variables[current_template][i].data());
+          ImGui::Text("%s", variable.name.c_str());
           ImGui::TableNextColumn();
           ImGui::SetNextItemWidth(-1);
-          const auto variable_value = fmt::format("##{}_value", template_variables[current_template][i].data());
-          ImGui::InputText(
-              variable_value.c_str(), &template_variables_value[current_template][i], ImGuiInputTextFlags_CharsNoBlank);
+          const auto variable_value = fmt::format("##{}_value", variable.name);
+          ImGui::InputText(variable_value.c_str(), &variable.value, ImGuiInputTextFlags_CharsNoBlank);
         }
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
@@ -139,9 +135,9 @@ void ProjectsGenerator::run() {  // Main loop
         ImGui::EndTable();
       }
       if (ImGui::Button("Generate")) {
-        if (std::any_of(template_variables_value[current_template].cbegin(),
-                        template_variables_value[current_template].cend(),
-                        [](const std::string &value) { return value.empty(); })) {
+        if (std::any_of(templates[current_template].variables.cbegin(),
+                        templates[current_template].variables.cend(),
+                        [](const TemplateVariable &variable) { return variable.value.empty(); })) {
           ImGui::OpenPopup("Missing value");
           error_message = "Missing one of the template parameters";
         } else if (!std::filesystem::exists(package_path)) {
@@ -154,22 +150,17 @@ void ProjectsGenerator::run() {  // Main loop
           env.add_callback("underscoreToDash",
                            [](inja::Arguments args) { return underscoreToDash(args[0]->get<std::string>()); });
           nlohmann::json data;
-          for (std::size_t i = 0; i < template_variables[current_template].size(); ++i) {
-            data[template_variables[current_template][i].data()] = template_variables_value[current_template][i];
+          for (auto &variable : templates[current_template].variables) {
+            data[variable.name] = variable.value;
           }
-          std::filesystem::create_directory(package_path + "/src");
-          std::filesystem::create_directory(package_path + "/include");
-          auto vcpkg_temp = env.parse_template(templates_path_ + "/imgui_templates/vcpkg.json.inja");
-          env.write(vcpkg_temp, data, package_path + "/vcpkg.json");
-          auto imgui_cpp_temp = env.parse_template(templates_path_ + "/imgui_templates/imgui.cpp.inja");
-          env.write(imgui_cpp_temp, data, package_path + "/src/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".cpp");
-          auto imgui_hpp_temp = env.parse_template(templates_path_ + "/imgui_templates/imgui.hpp.inja");
-          env.write(
-              imgui_hpp_temp, data, package_path + "/include/" + camelCaseToSnakeCase(data["CLASS_NAME"]) + ".hpp");
-          auto main_temp = env.parse_template(templates_path_ + "/imgui_templates/main.cpp.inja");
-          env.write(main_temp, data, package_path + "/src/main.cpp");
-          auto cmake_temp = env.parse_template(templates_path_ + "/imgui_templates/CMakeLists.txt.inja");
-          env.write(cmake_temp, data, package_path + "/CMakeLists.txt");
+          for (const auto &file : templates[current_template].files) {
+            const auto template_path = templates_path_ / templates[current_template].name / file.name;
+            const auto output_path = std::filesystem::path(package_path) / env.render(file.output_path, data);
+            spdlog::info("Generating `{}` from `{}`", output_path.string(), template_path.string());
+            std::filesystem::create_directories(output_path.parent_path());
+            const auto parsed_template = env.parse_template(template_path);
+            env.write(parsed_template, data, output_path);
+          }
         }
       }
       ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));

@@ -19,6 +19,7 @@ find_package(spdlog REQUIRED)
 find_package(inja REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(gflags REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -44,7 +45,8 @@ target_link_libraries(
          nlohmann_json::nlohmann_json
          stdc++fs
          fmt::fmt
-         imgui-filebrowser)
+         imgui-filebrowser
+         yaml-cpp)
 set_target_properties(projects_generator_lib PROPERTIES SOVERSION 0 VERSION 0.0.1)
 
 add_executable(projects_generator src/main.cpp)
@@ -59,4 +61,4 @@ install(
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES resources/projects_generator.desktop DESTINATION share/applications/)
 install(FILES resources/projects_generator.png DESTINATION share/icons/hicolor/128x128/apps)
-install(DIRECTORY imgui_templates DESTINATION share)
+install(DIRECTORY templates DESTINATION share)

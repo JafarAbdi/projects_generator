@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.2)
-project({{PROJECT_NAME}})
+project({{camelCaseToSnakeCase(PROJECT_NAME)}})
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -10,32 +10,32 @@ find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(spdlog REQUIRED)
 
-add_library({{PROJECT_NAME}}_lib SHARED
+add_library({{camelCaseToSnakeCase(PROJECT_NAME)}}_lib SHARED
   src/{{camelCaseToSnakeCase(CLASS_NAME)}}.cpp
 )
-target_include_directories({{PROJECT_NAME}}_lib
+target_include_directories({{camelCaseToSnakeCase(PROJECT_NAME)}}_lib
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PUBLIC $<INSTALL_INTERFACE:include>)
-target_link_libraries({{PROJECT_NAME}}_lib PUBLIC
+target_link_libraries({{camelCaseToSnakeCase(PROJECT_NAME)}}_lib PUBLIC
   imgui::imgui
   glfw
   GLEW::GLEW
   spdlog::spdlog
   spdlog::spdlog_header_only
 )
-set_target_properties({{PROJECT_NAME}}_lib PROPERTIES
+set_target_properties({{camelCaseToSnakeCase(PROJECT_NAME)}}_lib PROPERTIES
   SOVERSION 0
   VERSION 0.0.1
 )
 
-add_executable({{PROJECT_NAME}}_exec src/main.cpp)
-target_link_libraries({{PROJECT_NAME}}_exec PRIVATE
-  {{PROJECT_NAME}}_lib
+add_executable({{camelCaseToSnakeCase(PROJECT_NAME)}}_exec src/main.cpp)
+target_link_libraries({{camelCaseToSnakeCase(PROJECT_NAME)}}_exec PRIVATE
+  {{camelCaseToSnakeCase(PROJECT_NAME)}}_lib
 )
-target_include_directories({{PROJECT_NAME}}_exec PRIVATE include)
+target_include_directories({{camelCaseToSnakeCase(PROJECT_NAME)}}_exec PRIVATE include)
 
 include(GNUInstallDirs)
-install(TARGETS {{PROJECT_NAME}}_exec {{PROJECT_NAME}}_lib
+install(TARGETS {{camelCaseToSnakeCase(PROJECT_NAME)}}_exec {{camelCaseToSnakeCase(PROJECT_NAME)}}_lib
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
