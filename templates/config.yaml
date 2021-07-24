@@ -1,0 +1,20 @@
+templates:
+  - name: imgui
+    variables:
+      - name: CLASS_NAME
+        default: MyClass
+        description: Name of the class we want to generate
+      - name: PROJECT_NAME
+        default: my_project
+        description: Name of the CMake project
+    files:
+      - name: CMakeLists.txt.inja
+        output_path: CMakeLists.txt
+      - name: main.cpp.inja
+        output_path: src/main.cpp
+      - name: vcpkg.json.inja
+        output_path: vcpkg.json
+      - name: imgui.cpp.inja
+        output_path: src/{{camelCaseToSnakeCase(CLASS_NAME)}}.cpp
+      - name: imgui.hpp.inja
+        output_path: include/{{camelCaseToSnakeCase(CLASS_NAME)}}.hpp

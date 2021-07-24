@@ -7,6 +7,7 @@
 
 #include <array>
 #include <string_view>
+#include <templates.hpp>
 #include <unordered_map>
 #include <vector>
 
@@ -14,7 +15,7 @@ struct GLFWwindow;
 
 class ProjectsGenerator {
  public:
-  ProjectsGenerator(std::string templates_path);
+  explicit ProjectsGenerator(std::string templates_path);
 
   ~ProjectsGenerator();
 
@@ -22,12 +23,10 @@ class ProjectsGenerator {
 
  private:
   GLFWwindow *window_;
-  std::vector<std::string_view> templates_names = {"imgui"};
-  std::vector<std::vector<std::string_view>> template_variables = {{"PROJECT_NAME", "CLASS_NAME"}};
-  std::vector<std::vector<std::string>> template_variables_value{};
+  std::vector<Template> templates;
   std::size_t current_template = 0;
   ImGui::FileBrowser file_browser;
   std::string package_path;
   std::string error_message;
-  const std::string templates_path_;
+  const std::filesystem::path templates_path_;
 };

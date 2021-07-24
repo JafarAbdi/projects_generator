@@ -1,5 +1,5 @@
 {
-  "name": "{{underscoreToDash(PROJECT_NAME)}}",
+  "name": "{{underscoreToDash(camelCaseToSnakeCase(PROJECT_NAME))}}",
   "version-string": "0.0.1",
   "dependencies": [
     "spdlog",

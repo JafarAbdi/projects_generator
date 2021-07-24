@@ -9,6 +9,7 @@
     "inja",
     "fmt",
     "gflags",
+    "yaml-cpp",
     {
       "name": "imgui",
       "default-features": false,
