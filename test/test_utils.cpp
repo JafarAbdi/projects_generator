@@ -2,9 +2,7 @@
 
 #include <utils.hpp>
 
-TEST(UTILS, GetCurrentYear) {
-  EXPECT_EQ(2021, getCurrentYear());
-}
+TEST(UTILS, GetCurrentYear) { EXPECT_EQ(2021, getCurrentYear()); }
 
 TEST(UTILS, UnderscoreToDash) {
   EXPECT_EQ("project-generator", underscoreToDash("project_generator"));
@@ -20,7 +18,6 @@ TEST(UTILS, CamelCaseToSnakeCase) {
   EXPECT_EQ("project_generator", camelCaseToSnakeCase("projectGenerator"));
   EXPECT_EQ("projectgenerator", camelCaseToSnakeCase("projectgenerator"));
 }
-
 
 TEST(UTILS, capitalizeWordsWithWhitespace) {
   EXPECT_EQ("Project Generator", capitalizeWordsWithWhitespace("ProjectGenerator"));

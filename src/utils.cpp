@@ -44,12 +44,10 @@ std::string capitalizeWordsWithWhitespace(const std::string &input_string) {
         if (a.back() == ' ') {
           return std::move(a) + std::string(1, std::toupper(c));
         }
-        if(std::ispunct(c) != 0)
-        {
+        if (std::ispunct(c) != 0) {
           return std::move(a) + ' ';
         }
-        if(std::isupper(c) != 0)
-        {
+        if (std::isupper(c) != 0) {
           return std::move(a) + ' ' + c;
         }
         return std::move(a) + c;
