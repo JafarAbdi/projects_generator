@@ -53,6 +53,13 @@ add_executable(projects_generator src/main.cpp)
 target_link_libraries(projects_generator PRIVATE projects_generator_lib gflags)
 target_include_directories(projects_generator PRIVATE include)
 
+option(ENABLE_TESTING "Enable Test Builds" ON)
+if(ENABLE_TESTING)
+  enable_testing()
+  message("Building Tests.")
+  add_subdirectory(test)
+endif()
+
 include(GNUInstallDirs)
 install(
   TARGETS projects_generator projects_generator_lib

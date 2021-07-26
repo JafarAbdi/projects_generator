@@ -19,7 +19,12 @@
 ProjectsGenerator::ProjectsGenerator(std::string templates_path)
     : file_browser(ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir),
       templates_path_(std::move(templates_path)) {
-  templates = YAML::LoadFile(templates_path_ / "config.yaml")["templates"].as<std::vector<Template>>();
+  const auto config_path = templates_path_ / "config.yaml";
+  if (std::filesystem::exists(config_path)) {
+    templates = YAML::LoadFile(config_path)["templates"].as<std::vector<Template>>();
+  } else {
+    spdlog::error("Path {} doesn't exists.", config_path.string());
+  }
   spdlog::cfg::load_env_levels();
   // Setup window
   glfwSetErrorCallback(
@@ -113,7 +118,7 @@ void ProjectsGenerator::run() {  // Main loop
         for (auto &variable : templates[current_template].variables) {
           ImGui::TableNextRow();
           ImGui::TableNextColumn();
-          ImGui::Text("%s", variable.name.c_str());
+          ImGui::Text("%s %s", variable.name.c_str(), variable.optional ? "(optional)" : "");
           ImGui::TableNextColumn();
           ImGui::SetNextItemWidth(-1);
           const auto variable_value = fmt::format("##{}_value", variable.name);
@@ -135,9 +140,10 @@ void ProjectsGenerator::run() {  // Main loop
         ImGui::EndTable();
       }
       if (ImGui::Button("Generate")) {
-        if (std::any_of(templates[current_template].variables.cbegin(),
-                        templates[current_template].variables.cend(),
-                        [](const TemplateVariable &variable) { return variable.value.empty(); })) {
+        if (std::any_of(
+                templates[current_template].variables.cbegin(),
+                templates[current_template].variables.cend(),
+                [](const TemplateVariable &variable) { return variable.value.empty() && !variable.optional; })) {
           ImGui::OpenPopup("Missing value");
           error_message = "Missing one of the template parameters";
         } else if (!std::filesystem::exists(package_path)) {
@@ -145,10 +151,17 @@ void ProjectsGenerator::run() {  // Main loop
           ImGui::OpenPopup("Missing value");
         } else {
           inja::Environment env;
-          env.add_callback("camelCaseToSnakeCase",
-                           [](inja::Arguments args) { return camelCaseToSnakeCase(args[0]->get<std::string>()); });
-          env.add_callback("underscoreToDash",
-                           [](inja::Arguments args) { return underscoreToDash(args[0]->get<std::string>()); });
+          env.set_line_statement("{##}");
+          env.add_callback("camelCaseToSnakeCase", 1, [](inja::Arguments args) {
+            return camelCaseToSnakeCase(args[0]->get<std::string>());
+          });
+          env.add_callback("underscoreToDash", 1, [](inja::Arguments args) {
+            return underscoreToDash(args[0]->get<std::string>());
+          });
+          env.add_callback("capitalizeWordsWithWhitespace", 1, [](inja::Arguments args) {
+            return capitalizeWordsWithWhitespace(args[0]->get<std::string>());
+          });
+          env.add_callback("getCurrentYear", 0, [](const inja::Arguments & /* args */) { return getCurrentYear(); });
           nlohmann::json data;
           for (auto &variable : templates[current_template].variables) {
             data[variable.name] = variable.value;

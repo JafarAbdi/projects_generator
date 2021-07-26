@@ -16,6 +16,11 @@ Generate packages/projects from templates
 ./projects_generator-x86_64.AppImage
 ```
 
+### Run the program with different templates
+```
+./projects_generator-x86_64.AppImage --templates_path=/path_to_templates_dir
+```
+
 ### Debug the appimage program
 ```
 ./projects_generator-x86_64.AppImage --appimage-mount # cd /tmp/.mount_######

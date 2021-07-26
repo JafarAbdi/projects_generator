@@ -10,6 +10,7 @@ struct TemplateVariable {
   std::string name;
   std::string description;
   std::string value;
+  bool optional;
 };
 
 struct TemplateFile {
@@ -33,6 +34,7 @@ struct convert<TemplateVariable> {
     rhs.name = node["name"].as<std::string>();
     rhs.value = node["default"].as<std::string>("");
     rhs.description = node["description"].as<std::string>("");
+    rhs.optional = node["optional"].as<bool>(false);
     return true;
   }
 };
