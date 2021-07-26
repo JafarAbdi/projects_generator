@@ -19,7 +19,12 @@
 ProjectsGenerator::ProjectsGenerator(std::string templates_path)
     : file_browser(ImGuiFileBrowserFlags_SelectDirectory | ImGuiFileBrowserFlags_CreateNewDir),
       templates_path_(std::move(templates_path)) {
-  templates = YAML::LoadFile(templates_path_ / "config.yaml")["templates"].as<std::vector<Template>>();
+  const auto config_path = templates_path_ / "config.yaml";
+  if (std::filesystem::exists(config_path)) {
+    templates = YAML::LoadFile(config_path)["templates"].as<std::vector<Template>>();
+  } else {
+    spdlog::error("Path {} doesn't exists.", config_path.string());
+  }
   spdlog::cfg::load_env_levels();
   // Setup window
   glfwSetErrorCallback(
