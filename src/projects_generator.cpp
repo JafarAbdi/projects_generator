@@ -113,7 +113,7 @@ void ProjectsGenerator::run() {  // Main loop
         for (auto &variable : templates[current_template].variables) {
           ImGui::TableNextRow();
           ImGui::TableNextColumn();
-          ImGui::Text("%s", variable.name.c_str());
+          ImGui::Text("%s %s", variable.name.c_str(), variable.optional ? "(optional)" : "");
           ImGui::TableNextColumn();
           ImGui::SetNextItemWidth(-1);
           const auto variable_value = fmt::format("##{}_value", variable.name);
@@ -135,9 +135,10 @@ void ProjectsGenerator::run() {  // Main loop
         ImGui::EndTable();
       }
       if (ImGui::Button("Generate")) {
-        if (std::any_of(templates[current_template].variables.cbegin(),
-                        templates[current_template].variables.cend(),
-                        [](const TemplateVariable &variable) { return variable.value.empty(); })) {
+        if (std::any_of(
+                templates[current_template].variables.cbegin(),
+                templates[current_template].variables.cend(),
+                [](const TemplateVariable &variable) { return variable.value.empty() && !variable.optional; })) {
           ImGui::OpenPopup("Missing value");
           error_message = "Missing one of the template parameters";
         } else if (!std::filesystem::exists(package_path)) {
