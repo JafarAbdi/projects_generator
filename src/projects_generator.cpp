@@ -145,10 +145,17 @@ void ProjectsGenerator::run() {  // Main loop
           ImGui::OpenPopup("Missing value");
         } else {
           inja::Environment env;
-          env.add_callback("camelCaseToSnakeCase",
-                           [](inja::Arguments args) { return camelCaseToSnakeCase(args[0]->get<std::string>()); });
-          env.add_callback("underscoreToDash",
-                           [](inja::Arguments args) { return underscoreToDash(args[0]->get<std::string>()); });
+          env.set_line_statement("{##}");
+          env.add_callback("camelCaseToSnakeCase", 1, [](inja::Arguments args) {
+            return camelCaseToSnakeCase(args[0]->get<std::string>());
+          });
+          env.add_callback("underscoreToDash", 1, [](inja::Arguments args) {
+            return underscoreToDash(args[0]->get<std::string>());
+          });
+          env.add_callback("capitalizeWordsWithWhitespace", 1, [](inja::Arguments args) {
+            return capitalizeWordsWithWhitespace(args[0]->get<std::string>());
+          });
+          env.add_callback("getCurrentYear", 0, [](const inja::Arguments & /* args */) { return getCurrentYear(); });
           nlohmann::json data;
           for (auto &variable : templates[current_template].variables) {
             data[variable.name] = variable.value;
