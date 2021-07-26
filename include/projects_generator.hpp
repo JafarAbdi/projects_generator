@@ -16,7 +16,10 @@ struct GLFWwindow;
 class ProjectsGenerator {
  public:
   explicit ProjectsGenerator(std::string templates_path);
-
+  ProjectsGenerator(const ProjectsGenerator &) = delete;
+  ProjectsGenerator(ProjectsGenerator &&) = delete;
+  void operator=(const ProjectsGenerator &) = delete;
+  void operator=(ProjectsGenerator &&) = delete;
   ~ProjectsGenerator();
 
   void run();
