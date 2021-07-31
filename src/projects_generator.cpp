@@ -122,7 +122,7 @@ void ProjectsGenerator::run() {  // Main loop
           ImGui::TableNextColumn();
           ImGui::SetNextItemWidth(-1);
           const auto variable_value = fmt::format("##{}_value", variable.name);
-          ImGui::InputText(variable_value.c_str(), &variable.value, ImGuiInputTextFlags_CharsNoBlank);
+          ImGui::InputText(variable_value.c_str(), &variable.value);
         }
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
