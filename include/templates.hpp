@@ -10,7 +10,7 @@ struct TemplateVariable {
   std::string name;
   std::string description;
   std::string value;
-  bool optional;
+  bool optional{};
 };
 
 struct TemplateFile {
