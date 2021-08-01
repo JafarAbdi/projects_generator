@@ -119,6 +119,9 @@ void ProjectsGenerator::run() {  // Main loop
           ImGui::TableNextRow();
           ImGui::TableNextColumn();
           ImGui::Text("%s %s", variable.name.c_str(), variable.optional ? "(optional)" : "");
+          if (ImGui::IsItemHovered()) {
+            ImGui::SetTooltip("%s", variable.description.c_str());
+          }
           ImGui::TableNextColumn();
           ImGui::SetNextItemWidth(-1);
           const auto variable_value = fmt::format("##{}_value", variable.name);
