@@ -2,7 +2,7 @@
 
 #include "projects_generator.hpp"
 
-DEFINE_string(templates_path, ".", "The path for the templates directory -- default current directory");
+DEFINE_string(templates_path, "./templates", "The path for the templates directory -- default current directory");
 
 int main(int argc, char** argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
