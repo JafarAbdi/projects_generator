@@ -21,6 +21,8 @@ NOTE: If you got an error about `libGL.so.1` not found, you need to install `apt
 ### Run the program with different templates
 ```
 ./projects_generator-x86_64.AppImage --templates_path=/path_to_templates_dir
+./projects_generator-x86_64.AppImage --git_url=git@github.com:USER/REPO.git
+./projects_generator-x86_64.AppImage --git_url=https://github.com/USER/REPO.git
 ```
 
 ### Debug the appimage program
