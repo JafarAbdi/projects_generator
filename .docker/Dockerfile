@@ -14,7 +14,7 @@ RUN mkdir -p /opt
 RUN git clone https://github.com/JafarAbdi/vcpkg.git $VCPKG_DIR
 RUN cd $VCPKG_DIR && \
     # Use the same version as in build_cmake.yml
-    git checkout a3faaa48e2c7366015c23964d82c7b8640e04990 && \
+    git checkout 660b6ebf0158b456046c8b4ebc0334db34a1c9f6 && \
     ./bootstrap-vcpkg.sh -disableMetrics && \
     echo 'export PATH=$PATH:$VCPKG_DIR' >> ~/.bashrc && \
     echo 'source $VCPKG_DIR/scripts/vcpkg_completion.bash' >> ~/.bashrc
