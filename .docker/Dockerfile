@@ -8,9 +8,6 @@ RUN apt-get update && \
     apt-get install -y xorg-dev libgl1-mesa-dev libglu1-mesa-dev && \
     apt-get clean
 
-# Using Docker with CLion
-RUN useradd -m user && yes projects_generator | passwd user
-
 ENV VCPKG_DIR /opt/vcpkg
 
 RUN mkdir -p /opt
