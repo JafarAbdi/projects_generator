@@ -10,7 +10,7 @@ on:
     - cron: '42 1 * * *'
   workflow_dispatch:
   push:
-    branches: [ testing_docker ]
+    branches: [ main ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
