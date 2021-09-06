@@ -12,7 +12,8 @@ ENV VCPKG_DIR /opt/vcpkg
 RUN mkdir -p /opt
 RUN git clone https://github.com/JafarAbdi/vcpkg.git $VCPKG_DIR
 RUN cd $VCPKG_DIR && \
-    git checkout a3faaa48e2c7366015c23964d82c7b8640e04990 && \ # Use the same version as in build_cmake.yml
+    # Use the same version as in build_cmake.yml
+    git checkout a3faaa48e2c7366015c23964d82c7b8640e04990 && \
     ./bootstrap-vcpkg.sh -disableMetrics && \
     echo 'export PATH=$PATH:$VCPKG_DIR' >> ~/.bashrc && \
     echo 'source $VCPKG_DIR/scripts/vcpkg_completion.bash' >> ~/.bashrc
