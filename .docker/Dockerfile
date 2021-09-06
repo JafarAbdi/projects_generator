@@ -4,6 +4,8 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update
 RUN apt-get install -y curl unzip tar wget git cmake build-essential
+# Install OpenGL
+RUN apt-get install -y xorg-dev libgl1-mesa-dev libglu1-mesa-dev
 
 ENV VCPKG_DIR /opt/vcpkg
 
