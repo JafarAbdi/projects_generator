@@ -15,7 +15,7 @@ RUN cd $VCPKG_DIR && \
     echo 'source $VCPKG_DIR/scripts/vcpkg_completion.bash' >> ~/.bashrc
 
 WORKDIR /root
-RUN git clone git@github.com:JafarAbdi/projects_generator.git
+RUN git clone https://github.com/JafarAbdi/projects_generator.git
 RUN cd projects_generator && \
     mkdir -p build && \
     cd build && \
