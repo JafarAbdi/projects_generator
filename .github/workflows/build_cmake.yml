@@ -43,7 +43,7 @@ jobs:
           vcpkgGitCommitId: a3faaa48e2c7366015c23964d82c7b8640e04990
           vcpkgGitUrl: https://github.com/JafarAbdi/vcpkg.git
       - name: Run CMake to install the dependencies specified in the vcpkg.json manifest, generate project file and build the project
-        uses: lukka/run-cmake@v3
+        uses: lukka/run-cmake@v3.4
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
