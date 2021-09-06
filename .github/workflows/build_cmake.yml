@@ -40,10 +40,10 @@ jobs:
           # Ensure the vcpkg artifacts are cached, they are generated in the 'CMAKE_BINARY_DIR/vcpkg_installed' directory.
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
           # pr-shared_library_rel
-          vcpkgGitCommitId: a3faaa48e2c7366015c23964d82c7b8640e04990
+          vcpkgGitCommitId: 660b6ebf0158b456046c8b4ebc0334db34a1c9f6
           vcpkgGitUrl: https://github.com/JafarAbdi/vcpkg.git
       - name: Run CMake to install the dependencies specified in the vcpkg.json manifest, generate project file and build the project
-        uses: lukka/run-cmake@v3
+        uses: lukka/run-cmake@v3.4
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
