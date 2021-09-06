@@ -30,7 +30,7 @@ NOTE: If you got an error about `libGL.so.1` not found, you need to install `apt
 ./projects_generator-x86_64.AppImage --appimage-mount # cd /tmp/.mount_######
 ```
 
-# Develope inside docker image
+# Develop inside docker image
 ```
 docker pull ghcr.io/jafarabdi/projects_generator:main
 docker run -it ghcr.io/jafarabdi/projects_generator:main
