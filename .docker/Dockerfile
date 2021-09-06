@@ -2,10 +2,14 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update
-RUN apt-get install -y curl unzip tar wget git cmake build-essential
-# Install OpenGL
-RUN apt-get install -y xorg-dev libgl1-mesa-dev libglu1-mesa-dev
+RUN apt-get update && \
+    apt-get install -y curl unzip tar wget git cmake build-essential rsync clang gdb ssh && \
+    # Install OpenGL
+    apt-get install -y xorg-dev libgl1-mesa-dev libglu1-mesa-dev && \
+    apt-get clean
+
+# Using Docker with CLion
+RUN useradd -m user && yes projects_generator | passwd user
 
 ENV VCPKG_DIR /opt/vcpkg
 
@@ -23,4 +27,5 @@ RUN git clone https://github.com/JafarAbdi/projects_generator.git
 RUN cd projects_generator && \
     mkdir -p build && \
     cd build && \
-    cmake -DCMAKE_TOOLCHAIN_FILE=$VCPKG_DIR/scripts/buildsystems/vcpkg.cmake ..
+    cmake -DCMAKE_TOOLCHAIN_FILE=$VCPKG_DIR/scripts/buildsystems/vcpkg.cmake .. && \
+    make -j$(nproc)
